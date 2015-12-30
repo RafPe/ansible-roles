@@ -1,0 +1,24 @@
+---
+  - name: Install keepaliveD
+    apt: name=keepalived state=present force=yes
+
+  - name: Adds binding ipv4 allow to sysctl
+    lineinfile: dest=/etc/sysctl.conf  line="net.ipv4.ip_nonlocal_bind=1" state=present create=no
+
+  - name: create service for keepaliveD
+    shell: sysctl -p
+
+  - name: Test
+    shell: echo {{ item }}
+    with_items: 
+      - "{{ansible_default_ipv4.address}}"
+      - "{{ vip }}"
+
+  - name: Create config files
+    template: src=keepaliveD.j2 dest=/etc/keepalived/keepalived.conf owner=root group=root mode="u=rw,g=rw,o=r"
+    with_items:
+    -  vip: "{{ vip }}"
+
+  - name: Ensure keepaliveD is running
+    service: name=keepalived state=started
+
