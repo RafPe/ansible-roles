@@ -3,11 +3,11 @@ vrrp_instance VI_1 {
         state BACKUP
         virtual_router_id 91
         priority 100
-        virtual_ipaddress {
-            {{item.vip}} 
-        }
+
+        virtual_ipaddress { {{item.vip}} }
         unicast_src_ip {{ansible_default_ipv4.address}}
-        unicast_peer {
-         {{peerip}}
-        }
+        unicast_peer { {{peerip}} }
+        
+        track_interface { eth0 }
+
 }

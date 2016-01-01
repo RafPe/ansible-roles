@@ -1,0 +1,4 @@
+consul_datacenter: bitbrains
+consul_server_root_cmd: "-server -advertise {{ansible_default_ipv4.address}}  -bootstrap-expect 2 -dc {{ consul_datacenter }}  -ui-dir /ui"
+consul_server_node_cmd: "-server -dc {{ consul_datacenter }}  -advertise {{ansible_default_ipv4.address}}  -join {{ consul_server_root_ip }} -ui-dir /ui"
+consul_server_root_ip: 172.16.2.252

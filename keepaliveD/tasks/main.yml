@@ -11,8 +11,8 @@
   - name: Test
     shell: echo {{ item }}
     with_items: 
-      - "{{ansible_default_ipv4.address}}"
-      - "{{ vip }}"
+      - "IPv4 {{ansible_default_ipv4.address}}"
+      - "VIP {{ vip }}"
 
   - name: Create config files
     template: src=keepaliveD.j2 dest=/etc/keepalived/keepalived.conf owner=root group=root mode="u=rw,g=rw,o=r"

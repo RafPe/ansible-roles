@@ -1,0 +1,7 @@
+--- 
+  
+  - name: Ensure proper name resolution 
+    template: src=bind.j2 dest=/etc/resolvconf/resolv.conf.d/head  owner=root group=root mode="u=rw,g=rw,o=r"
+    with_items:
+    -  primary_dns: "{{ primary_dns }}"
+    -  secondary_dns "{{ secondary_dns }}"

@@ -1,6 +1,6 @@
 ---
-  - name: Ensure that Google DNS is added
-    lineinfile: dest=/etc/resolvconf/resolv.conf.d/head  line="nameserver 8.8.8.8" state=present create=yes
+  - name: Ensure that consul DNS search domain is added
+    lineinfile: dest=/etc/resolvconf/resolv.conf.d/head  line="search consul" state=present create=yes
 
   - name: Adding Docker apt key
     apt_key:

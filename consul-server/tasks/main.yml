@@ -1,0 +1,29 @@
+--- 
+  - name: Test
+    shell: echo {{ item }}
+    with_items:
+      - "IPv4 {{ ansible_default_ipv4.address }}"
+      - "CONSUL_CMD {{ consul_cmd }}"
+      - "CONSUL_ROOT_IP {{ consul_server_root_ip }}"
+      - "VIP:  {{ vip}}"
+  
+  - name: consul server container
+    docker:
+      name: consul
+      image: progrium/consul
+      hostname: "{{ ansible_nodename }}"
+      command: "{{ consul_cmd }}"
+      state: reloaded
+      ports:
+       - "{{ansible_default_ipv4.address}}:8300:8300"
+       - "{{ansible_default_ipv4.address}}:8301:8301/tcp"
+       - "{{ansible_default_ipv4.address}}:8301:8301/udp"
+       - "{{ansible_default_ipv4.address}}:8302:8302/tcp"
+       - "{{ansible_default_ipv4.address}}:8302:8302/udp"
+       - "{{ansible_default_ipv4.address}}:8400:8400/tcp"
+       - "{{ansible_default_ipv4.address}}:8500:8500/tcp"
+       - "0.0.0.0:53:53/udp"
+      restart_policy: always
+      restart_policy_retry: 3
+
+
