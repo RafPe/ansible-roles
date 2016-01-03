@@ -8,7 +8,10 @@
     set_fact:
        consul_cmd: "{{ consul_server_node_cmd }}"
     when: consul_server_role == 'node'
-  
+
+  - name: Creates directory
+    file: path=/docker-data/consul  state=directory  
+
   - name: consul server container
     docker:
       name: consul
@@ -16,6 +19,8 @@
       hostname: "{{ ansible_nodename }}"
       command: "{{ consul_cmd }}"
       state: reloaded
+      volumes:
+       - /docker-data/consul:/data
       ports:
        - "0.0.0.0:8300:8300"
        - "0.0.0.0:8301:8301/tcp"

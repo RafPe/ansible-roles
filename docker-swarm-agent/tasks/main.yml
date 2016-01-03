@@ -1,0 +1,10 @@
+---
+  - name: swarm agent container
+    docker:
+      name: swarm
+      image: swarm
+      hostname: "{{ ansible_nodename }}"
+      command: "join --advertise={{ansible_default_ipv4.address}}:{docker_deamon_port}} consul://{{ consul_address }}:8500"
+      net: host
+      restart_policy: always
+      restart_policy_retry: 3

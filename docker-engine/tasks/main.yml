@@ -1,26 +1,28 @@
 ---
+  - name: Check if docker-engine is installed
+    command: dpkg-query -l docker-engine
+    register: isDockerInstalled
+    failed_when: isDockerInstalled.rc > 1 # Since this is never be >1 this step will not fail our playbook
+  
   - name: Adding Docker apt key
     apt_key:
         keyserver=pgp.mit.edu
         id=58118E89F3A912897C070ADBF76221572C52609D
+    when: isDockerInstalled.rc.rc == 1
 
   - name: Configure docker repository
     lineinfile: dest=/etc/apt/sources.list.d/docker.list line="deb https://apt.dockerproject.org/repo ubuntu-trusty main" state=present create=yes
-  
-  - name: Set docker deamon opts - cluster
-    set_fact:
-      docker_deamon_opts: "{{ docker_deamon_options_cluster }}"
-      when: docker_deamon_cluster == 'true'
-
-  - name: Set docker deamon opts - standard
-    set_fact:
-      docker_deamon_opts: "{{ docker_deamon_options_standard }}"
-      when: docker_deamon_cluster != 'true' or docker_deamon_cluster is not defined 
-
-  - name: Configure Docker Opts
-    lineinfile: 'dest=/etc/default/docker line="DOCKER_OPTS=\"{{ docker_deamon_opts }}\"" state=present create=no backrefs=yes regexp="(^|#)DOCKER_OPTS.*"'
+   
+  - name: Configure Docker Opts - standard
+    lineinfile: 'dest=/etc/default/docker line="DOCKER_OPTS=\"{{ docker_deamon_options_standard  }}\"" state=present create=no backrefs=yes regexp="(^|#)DOCKER_OPTS.*"'
     register: dockerDeamonOpts 
-     
+    when: docker_mode == 'standard'
+
+  - name: Configure Docker Opts - cluster
+    lineinfile: 'dest=/etc/default/docker line="DOCKER_OPTS=\"{{ docker_deamon_options_cluster }}\"" state=present create=no backrefs=yes regexp="(^|#)DOCKER_OPTS.*"'
+    register: dockerDeamonOpts
+    when: docker_mode == 'cluster'    
+
   - name: Restart docker deamon due to OPTs change
     service: name=docker state=restarted enabled=yes
     when: dockerDeamonOpts.changed
@@ -30,10 +32,11 @@
     with_items:
         - docker-engine
         - python-pip
+    when: isDockerInstalled.rc.rc == 1 
         
   - name: Install docker-py
     pip: name=docker-py version=1.2.3
-
+        
   - name: Ensure Docker service is running
     service:
         name=docker

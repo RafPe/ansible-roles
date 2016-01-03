@@ -1,0 +1,9 @@
+---
+  - name: swarm manager container
+    docker:
+      name: swarm
+      image: swarm
+      command: "manage -H :{{swarm_manager_port}}  --replication --advertise {{ansible_default_ipv4.address}}:{{swarm_manager_port}} consul://{{consul_address}}:8500"
+      net: host
+      restart_policy: always
+      restart_policy_retry: 3
