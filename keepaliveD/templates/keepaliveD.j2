@@ -1,13 +1,17 @@
 vrrp_instance VI_1 {
-        interface eth0
-        state BACKUP
+        interface {{vip_interface}}
+        state {{ vip_state }}
         virtual_router_id 91
         priority 100
 
-        virtual_ipaddress { {{item.vip}} }
-        unicast_src_ip {{ansible_default_ipv4.address}}
-        unicast_peer { {{peerip}} }
-        
-        track_interface { eth0 }
+        unicast_src_ip {{ansible_default_ipv4.address}}   # Unicast specific option, this is the IP of the interface keepalived listens on
+        unicast_peer {                 # Unicast specific option, this is the IP of the peer instance
+              {{ peerip }} 
+        }
+
+         virtual_ipaddress {     # The VIP that keepalived will monitor
+              {{ vip }}/{{vip_cidr}} dev {{vip_interface}}  
+         }     
+
 
 }

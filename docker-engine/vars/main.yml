@@ -1,0 +1,8 @@
+docker_dns_primary: 172.16.2.254
+docker_dns_secondary: 8.8.8.8
+docker_bridge_cidr: "192.168.178.1/24"
+docker_dns_search_domain: consul
+docker_cluster_store: "consul://192.168.1.1:8500"
+docker_deamon_options_standard: "--dns {{ docker_dns_primary }} --dns {{ docker_dns_secondary }} --bip={{ docker_bridge_cidr }} --dns-search {{ docker_dns_search_domain }}"
+docker_deamon_options_cluster: "--dns {{ docker_dns_primary }} --dns {{ docker_dns_secondary }} --bip={{ docker_bridge_cidr }} --dns-search {{ docker_dns_search_domain }} --cluster-advertise {{ ansible_default_ipv4.address }}:2376 --cluster-store {{ docker_cluster_store }}"
+

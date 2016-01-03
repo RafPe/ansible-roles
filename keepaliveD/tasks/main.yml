@@ -4,21 +4,22 @@
 
   - name: Adds binding ipv4 allow to sysctl
     lineinfile: dest=/etc/sysctl.conf  line="net.ipv4.ip_nonlocal_bind=1" state=present create=no
+    register: sysctlbinding
 
   - name: create service for keepaliveD
     shell: sysctl -p
-
-  - name: Test
-    shell: echo {{ item }}
-    with_items: 
-      - "IPv4 {{ansible_default_ipv4.address}}"
-      - "VIP {{ vip }}"
-
+    when: sysctlbinding.changed 
+   
   - name: Create config files
     template: src=keepaliveD.j2 dest=/etc/keepalived/keepalived.conf owner=root group=root mode="u=rw,g=rw,o=r"
     with_items:
     -  vip: "{{ vip }}"
+    register: keepaliveDconfig
 
+  - name: Restart service when config changed
+    service: name=keepalived state=restarted enabled=yes
+    when: keepaliveDconfig.changed
+ 
   - name: Ensure keepaliveD is running
     service: name=keepalived state=started
 
