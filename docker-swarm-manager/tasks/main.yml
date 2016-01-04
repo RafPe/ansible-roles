@@ -1,11 +1,17 @@
 ---
+
   - name: swarm manager container
     docker:
       name: swarm
       image: swarm
-      command: "manage -H :{{swarm_manager_port}}  --replication --advertise {{ansible_default_ipv4.address}}:{{swarm_manager_port}} consul://{{consul_address}}:8500"
+      command: "manage -H :{{swarm_manager_port}}  --replication --advertise {{ansible_default_ipv4.address}}:{{swarm_manager_port}} consul://{{ ansible_default_ipv4.address  }}:8500"
       net: host
       state: reloaded
       restart_policy: always
       restart_policy_retry: 3
+   
+  - name: Register swarm manager service
+    template: src=consul-service.j2 dest=/etc/consul.d/service-swarm.json 
 
+  - name: Restart consul service
+    service: name=consul state=reloaded 

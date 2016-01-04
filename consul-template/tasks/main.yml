@@ -1,0 +1,38 @@
+---
+
+- name: Check if consul exists 
+  stat: "path=/usr/local/bin/consul-template" 
+  register: consul_is_installed
+
+- name: Download consul
+  get_url: "url=http://releases.hashicorp.com/consul-template/{{ consul_version }}/consul-template_{{ consul_version }}_linux_amd64.zip dest=/usr/local/bin/consul-template.zip"
+  register: consul_is_downloaded
+  when: consul_is_installed.stat.exists != True
+
+- name: Unpack consul file
+  unarchive: "src=/usr/local/bin/consul-template.zip  dest=/usr/local/bin copy=no"
+  when: consul_is_downloaded is defined and consul_is_installed.stat.exists != True 
+
+- name: Create directories
+  file: "path={{ item }}  state=directory"
+  with_items:
+   - "/etc/consul-template.d"                # configurations directory
+   - "/etc/ansible/facts.d"                  # custom facts directory
+
+- name: Remove left over file 
+  shell: "rm -f /usr/local/bin/consul-template.zip"
+  when: consul_is_downloaded is defined
+
+- name: install custom fact module for consule
+  template:  "src=local_facts_consul-template.sh.j2 dest=/etc/ansible/facts.d/consul-template.fact mode=0755"
+
+- debug: msg="LOCAL >> {{ansible_local}}"
+
+- name: reload ansible_local
+  setup: filter=ansible_local
+
+- name: Create upstart
+  template: "src=upstart_consul-template.j2 dest=/etc/init/consul-template.conf owner=root group=root mode=u=rw,g=rw,o=r"
+
+- name: Ensure service is running
+  service: name=consul-template state=started

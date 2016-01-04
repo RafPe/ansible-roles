@@ -1,0 +1,5 @@
+{% for host in groups['svcgateways'] %}
+{% if host != inventory_hostname %}
+  - {{ hostvars[host][my_address] }}
+{% endif %}
+{% endfor %}

@@ -1,0 +1,14 @@
+--- 
+  
+  - name: Ensure proper name resolution 
+    template: src=gateway_hosts.j2 dest=/etc/resolvconf/resolv.conf.d/head  owner=root group=root mode="u=rw,g=rw,o=r"
+  
+  - name: Ensure that localhost is in resolvers
+    lineinfile: dest=/etc/resolvconf/resolv.conf.d/head line="nameserver 127.0.0.1" state=present create=no
+    when: dns_use_localhost is defined
+
+  - name: Reload resolver 
+    shell: resolvconf -u 
+ 
+  - name: Ensure that hostname is present in localhost 
+    lineinfile: dest=/etc/hosts line="127.0.0.1       localhost {{ ansible_nodename }}" state=present create=no

@@ -1,6 +1,6 @@
 ---
   - name: Install keepaliveD
-    apt: name=keepalived state=present force=yes
+    apt: name=keepalived state=latest force=yes
 
   - name: Adds binding ipv4 allow to sysctl
     lineinfile: dest=/etc/sysctl.conf  line="net.ipv4.ip_nonlocal_bind=1" state=present create=no
@@ -18,7 +18,7 @@
 
   - name: Restart service when config changed
     service: name=keepalived state=restarted enabled=yes
-    when: keepaliveDconfig.changed
+#    when: keepaliveDconfig.changed
  
   - name: Ensure keepaliveD is running
     service: name=keepalived state=started

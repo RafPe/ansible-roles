@@ -3,6 +3,7 @@ vrrp_instance VI_1 {
         state {{ vip_state }}
         virtual_router_id 91
         priority 100
+        advert_int 1
 
         unicast_src_ip {{ansible_default_ipv4.address}}   # Unicast specific option, this is the IP of the interface keepalived listens on
         unicast_peer {                 # Unicast specific option, this is the IP of the peer instance
@@ -10,7 +11,7 @@ vrrp_instance VI_1 {
         }
 
          virtual_ipaddress {     # The VIP that keepalived will monitor
-              {{ vip }}/{{vip_cidr}} dev {{vip_interface}}  
+              {{ vip }}  
          }     
 
 
