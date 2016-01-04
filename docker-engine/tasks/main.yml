@@ -8,7 +8,7 @@
     apt_key:
         keyserver=pgp.mit.edu
         id=58118E89F3A912897C070ADBF76221572C52609D
-    when: isDockerInstalled.rc.rc == 1
+    when: isDockerInstalled.rc == 1
 
   - name: Configure docker repository
     lineinfile: dest=/etc/apt/sources.list.d/docker.list line="deb https://apt.dockerproject.org/repo ubuntu-trusty main" state=present create=yes
@@ -32,7 +32,7 @@
     with_items:
         - docker-engine
         - python-pip
-    when: isDockerInstalled.rc.rc == 1 
+    when: isDockerInstalled.rc == 1 
         
   - name: Install docker-py
     pip: name=docker-py version=1.2.3

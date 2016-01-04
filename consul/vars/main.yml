@@ -1,0 +1,8 @@
+consul_bootstrap_expect: 2
+consul_server: true
+consul_datacenter: bitbrains
+consul_data_dir: /data-local/consul 
+consul_ui_dir: /data-local/consul-ui
+consul_log_level: INFO
+consul_enable_syslog: true
+

@@ -5,3 +5,6 @@
     with_items:
     -  primary_dns: "{{ primary_dns }}"
     -  secondary_dns "{{ secondary_dns }}"
+
+  - name: Ensure that hostname is present in localhost 
+    lineinfile: dest=/etc/hosts line="127.0.0.1       localhost {{ ansible_nodename }}" state=present create=no

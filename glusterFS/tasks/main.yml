@@ -1,0 +1,25 @@
+- name: Ensure GlusterFS is installed.
+  apt:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - glusterfs-server
+    - glusterfs-client
+
+
+- name: Creates glusterFS directory
+  file: path=/glusterFS-data/bricks/g1  state=directory
+  when: fake is defined  
+
+- name: create gluster volume
+  gluster_volume: state=present name=test1 bricks=/glusterFS-data/bricks/g1  rebalance=yes cluster="172.16.2.108,172.16.2.109,172.16.2.110"
+  run_once: true
+  when: fake is defined
+
+- name: tune
+  gluster_volume: 'state=present name=test1 options={performance.cache-size: 256MB}'
+  when: fake is defined
+
+- name: start gluster volume
+  gluster_volume: state=started name=test1
+  when: fake is defined

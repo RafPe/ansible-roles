@@ -1,0 +1,60 @@
+---
+
+- name: Check if consul exists 
+  stat: "path=/usr/local/bin/{{consul_type}}" 
+  register: consul_is_installed
+
+- name: Download consul
+  get_url: "url=http://releases.hashicorp.com/{{consul_type}}/{{ consul_version }}/{{ consul_type }}_{{ consul_version }}_linux_amd64.zip dest=/usr/local/bin/{{consul_type}}.zip"
+  register: consul_is_downloaded
+  when: consul_is_installed.stat.exists != True
+
+- name: Unpack consul file
+  unarchive: "src=/usr/local/bin/{{consul_type}}.zip  dest=/usr/local/bin copy=no"
+  when: consul_is_downloaded is defined and consul_is_installed.stat.exists != True 
+
+- name: Create directories
+  file: "path={{ item }}  state=directory"
+  with_items:
+   - "{{consul_ui_dir}}"                     # directory for UI
+   - "{{consul_data_dir}}"                   # directory to hold data
+   - "/etc/{{consul_type}}.d"                # configurations directory
+   - "/etc/ansible/facts.d"                  # custom facts directory
+
+- name: download consul UI 
+  get_url: url=http://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_web_ui.zip dest={{consul_ui_dir}}
+  when: consul_ui == true  
+
+- name: Remove left over file 
+  shell: "rm -f /usr/local/bin/{{consul_type }}.zip"
+  when: consul_is_downloaded is defined
+
+- name: install custom fact module for consule
+  template:  "src={{consul_type}}.sh.j2 dest=/etc/ansible/facts.d/{{consul_type}}.fact mode=0755"
+
+- debug: msg="LOCAL >> {{ansible_local}}"
+
+- name: reload ansible_local
+  setup: filter=ansible_local
+
+- name: Create upstart
+  template: "src=upstart.j2 dest=/etc/init/{{consul_type}}.conf owner=root group=root mode=u=rw,g=rw,o=r"
+
+- name: Create config file - bootstrap 
+  template: "src=bootstrap.j2 dest=/etc/{{consul_type}}.d/consul.json owner=root group=root mode=u=rw,g=rw,o=r"
+  delegate_to: svg01
+
+- name: Create config file - server
+  template: "src=server.j2 dest=/etc/{{consul_type}}.d/consul.json owner=root group=root mode=u=rw,g=rw,o=r"
+  when: ansible_hostname != "svg01"
+
+- name: Ensure service is running
+  service: name=consul state=started
+
+- name: Install dnsmasq
+  apt: name=dnsmasq state=present force=yes
+
+- name: Create config file - server
+  template: "src=dnsmasq.j2 dest=/etc/dnsmasq.d/10-consul owner=root group=root mode=u=rw,g=rw,o=r"
+
+ 
